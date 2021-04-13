@@ -3,14 +3,14 @@ import java.awt.*;
 import java.awt.event.*;
 
 
-public class quz implements ActionListener
+public class Bank implements ActionListener
 {
     JFrame f1=new JFrame("Online banking Log In");
     JLabel l1,l2;
     JTextField t1,t2;
     JButton b1;
 
-    quz()
+    Bank()
     {
         l1=new JLabel("User Name");
         l2=new JLabel("Password");
@@ -49,7 +49,7 @@ public class quz implements ActionListener
 
     public static void main(String ag[])
     {
-        quz p1=new quz();
+        Bank p1=new Bank();
     }
 }
 
