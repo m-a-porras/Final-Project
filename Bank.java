@@ -16,7 +16,7 @@ public class quz implements ActionListener
         l2=new JLabel("Password");
         t1=new JTextField(20);
         t2=new JTextField(20);
-        b1=new JButton("OK");
+        b1=new JButton("Log in");
 
         f1.setSize(400,400);
         f1.setVisible(true);
@@ -32,11 +32,11 @@ public class quz implements ActionListener
         Container c = f1.getContentPane();
         c.setBackground(Color.LIGHT_GRAY);
 
-        l1.setBounds(0,30,100,30);
-        t1.setBounds(110,30,100,30);
-        l2.setBounds(0,70,100,30);
-        t2.setBounds(110,70,100,30);
-        b1.setBounds(0,120,100,30);
+        l1.setBounds(90,50,100,30);
+        t1.setBounds(200,50,100,30);
+        l2.setBounds(90,90,100,30);
+        t2.setBounds(200,90,100,30);
+        b1.setBounds(130,160,100,30);
 
         b1.addActionListener(this);
     }
