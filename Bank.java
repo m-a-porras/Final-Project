@@ -1,350 +1,437 @@
-import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 
 
-public class Bank implements ActionListener
-{
-    JFrame f1=new JFrame("Online banking Log In");
-    JLabel l1,l2;
-    JTextField t1,t2;
-    JButton b1;
+public class TheBankApp {
 
-    Bank()
+
+
+
+    private static JFrame mainFrame;
+    private static JPanel mainPanel, loginPanel, detailsPanel, buttonsPanel;
+    private static JLabel loginAccLabel;
+    private static JTextField loginField;
+    private static JButton loginButton;
+
+    private static JLabel holderNameLabel;
+    private static JTextField holderNameField;
+    private static JLabel accountNumberLabel;
+    private static JTextField accountNumberField;
+    private static JLabel balanceLabel;
+    private static JTextField balanceField;
+
+    private static JButton depositButton, withdrawButton, transferButton, writeButton;
+
+
+    private static Account owner = null;
+
+    public static void main(String[] args)
     {
-        l1=new JLabel("User Name");
-        l2=new JLabel("Password");
-        t1=new JTextField(20);
+
+        JFrame frame = new JFrame("Banking");
+        frame.getContentPane().setBackground(Color.red);
+
+        frame.pack();
+
+
+// load all accounts
+        ArrayList<Account> accounts = loadAccounts();
 
 
 
 
-        t2=new JTextField(20);
-        b1=new JButton("OK");
 
-        f1.setSize(400,400);
-        f1.setVisible(true);
-        f1.setLayout(null);
+        mainPanel = new JPanel(new GridLayout(2, 1));
 
-        f1.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-        f1.add(l1);
-        f1.add(t1);
-        f1.add(l2);
-        f1.add(t2);
-
-        f1.getContentPane().add(b1);
-        Container c = f1.getContentPane();
-        c.setBackground(Color.LIGHT_GRAY);
-
-        l1.setBounds(0,30,100,30);
-        t1.setBounds(110,30,100,30);
-        l2.setBounds(0,70,100,30);
-        t2.setBounds(110,70,100,30);
-        b1.setBounds(0,120,100,30);
-
-        b1.addActionListener(this);
+        loginPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        loginAccLabel = new JLabel("Please Enter Account Number: ");
+        loginField = new JTextField(25);
+        loginButton = new JButton("Log In");
+        JLabel loginaccount = new JLabel("Accounts: 1234,4321,6789");
+        loginaccount.setText("Account Numbers: 1234, 4321, 6789");
+        loginaccount.setBounds(1000,10,100,20);
 
 
 
-        t1.addActionListener(new ActionListener() {
+
+        loginPanel.add(loginAccLabel);
+        loginPanel.add(loginField);
+        loginPanel.add(loginButton);
+        loginPanel.add(loginaccount);
+
+        detailsPanel = new JPanel(new GridLayout(3, 2));
+        holderNameLabel = new JLabel("Account Name: ");
+        holderNameField = new JTextField(20);
+        holderNameField.setEditable(false);
+
+        accountNumberLabel = new JLabel("Account Number: ");
+        accountNumberField = new JTextField(25);
+        accountNumberField.setEditable(false);
+        balanceLabel = new JLabel("Balance: ");
+        balanceField = new JTextField(10);
+        balanceField.setEditable(false);
+
+        detailsPanel.add(holderNameLabel);
+        detailsPanel.add(holderNameField);
+        detailsPanel.add(accountNumberLabel);
+        detailsPanel.add(accountNumberField);
+        detailsPanel.add(balanceLabel);
+        detailsPanel.add(balanceField);
+
+        buttonsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        depositButton = new JButton("Deposit");
+        withdrawButton = new JButton("Withdraw");
+        transferButton = new JButton("Transfer");
+
+        depositButton.setEnabled(false);
+        withdrawButton.setEnabled(false);
+        transferButton.setEnabled(false);
+
+
+        buttonsPanel.add(depositButton);
+        buttonsPanel.add(withdrawButton);
+        buttonsPanel.add(transferButton);
+
+
+        mainPanel.add(loginPanel);
+        mainPanel.add(detailsPanel);
+        mainPanel.add(buttonsPanel);
+
+        frame.add(mainPanel);
+        frame.setSize(600, 250);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+
+
+// action listener for log in button
+        loginButton.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent event) {
-                System.out.println("User Name is: " + t1.getText());
+            public void actionPerformed(ActionEvent e) {
+                if(loginField.getText().equals(""))
+                    JOptionPane.showMessageDialog(null, "Enter an Account Number");
+                else
+                {
+                    String accNum = loginField.getText().trim();
+                    if(searchAccount(accounts, accNum) == -1)
+                        JOptionPane.showMessageDialog(null, "No accounts found for account number: " + accNum);
+                    else
+                    {
+                        owner = accounts.get(searchAccount(accounts, accNum));
+                        holderNameField.setText(owner.getaccountName());
+                        accountNumberField.setText(owner.getAccountNumber());
+                        balanceField.setText(String.format("$ %.2f", owner.getBalance()));
+
+                        depositButton.setEnabled(true);
+                        withdrawButton.setEnabled(true);
+                        transferButton.setEnabled(true);
+
+                    }
+                }
             }
         });
 
-
-        t2.addActionListener(new ActionListener() {
+// action listener for deposit button
+        depositButton.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent event) {
-                System.out.println("Password is: " + t2.getText());
+            public void actionPerformed(ActionEvent e) {
+                String inp = JOptionPane.showInputDialog("Deposit Amount:");
+                while(!isDouble(inp))
+                {
+                    inp = JOptionPane.showInputDialog("Deposit Amount:");
+                }
+                double amount = Double.parseDouble(inp);
+                owner.deposit(amount);
+                balanceField.setText(String.format("$ %.2f", owner.getBalance()));
+            }
+        });
+
+// action listener for withdraw button
+        withdrawButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String inp = JOptionPane.showInputDialog("Withdraw Amount:");
+                while(!isDouble(inp))
+                {
+                    inp = JOptionPane.showInputDialog("Withdraw Amount:");
+                }
+                double amount = Double.parseDouble(inp);
+                owner.withdraw(amount);
+                balanceField.setText(String.format("$ %.2f", owner.getBalance()));
+            }
+        });
+
+// action listener for transfer button
+        transferButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String accNum = JOptionPane.showInputDialog("Transfer Account Number:");
+                if(accNum.equals(""))
+                {
+                    JOptionPane.showMessageDialog(null, "Account Number Invalid");
+                    return;
+                }
+                int index = searchAccount(accounts, accNum);
+                if(index == -1)
+                {
+                    JOptionPane.showMessageDialog(null, "Account Number Does Not Have an Account: " + accNum);
+                    return;
+                }
+
+                Account transfer = accounts.get(index);
+                String inp = JOptionPane.showInputDialog("Transfer Amount:");
+                while(!isDouble(inp))
+                {
+                    inp = JOptionPane.showInputDialog("Transfer Amount:");
+                }
+                owner.transfer(transfer, index);
+                balanceField.setText(String.format("$ %.2f", owner.getBalance()));
+            }
+        });
+
+// action listener for write button
+        withdrawButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+
             }
         });
     }
 
-
-    public void actionPerformed(ActionEvent e)
+    private static ArrayList<Account> loadAccounts()
     {
-        f1.dispose();
-        Project1 p2=new Project1();
+        ArrayList<Account> accs = new ArrayList<>();
+
+        accs.add(new Checking("Grant", "1234", 10000));
+
+        accs.add(new Checking("Miriam", "4321", 8000));
+
+        accs.add(new Savings("Dave", "6789", 4000));
+
+
+        return accs;
     }
 
-    public static void main(String args[])
+    private static int searchAccount(ArrayList<Account> accounts, String accountNumber)
     {
-        Bank p1=new Bank();
+        int index = -1;
+
+        for(int i = 0; i < accounts.size(); i++)
+        {
+            if(accounts.get(i).getAccountNumber().equals(accountNumber))
+            {
+                index = i;
+                break;
+            }
+        }
+        return index;
+    }
+
+
+
+    private static boolean isDouble(String s)
+    {
+        try
+        {
+            Double.parseDouble(s);
+            return true;
+        }catch(NumberFormatException nfe){
+            JOptionPane.showMessageDialog(null, s + "Please Enter a Number");
+            return false;
+        }
     }
 }
 
-//Second JFrame
+
+//Checkings.java
+
+import javax.swing.JOptionPane;
+
+public class Checking extends Account{
 
 
-class Project1 implements ActionListener {
-    JFrame f1 = new JFrame("Banking");
+    private double overDraft;
 
-
-    JButton b0;
-    JLabel l3;
-    JLabel l4;
-
-
-    Project1() {
-        JLabel l3 = new JLabel("Online Banking", SwingConstants.CENTER);
-        l3.setFont(new Font("Serif", Font.BOLD, 20));
-
-        JLabel l4 = new JLabel("Choose an account:");
-        l4.setFont(new Font("Serif", Font.BOLD, 15));
-
-
-        b0 = new JButton("Checking");
-
-
-        f1.setSize(400, 400);
-        f1.setVisible(true);
-        f1.setLayout(null);
-
-        f1.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-
-
-        f1.add(l3);
-        f1.add(l4);
-
-
-        f1.getContentPane().add(b0);
-        Container c = f1.getContentPane();
-        c.setBackground(Color.LIGHT_GRAY);
-
-
-        b0.setBounds(145, 100, 100, 30);
-
-
-
-        l3.setBounds(100, 10, 200, 30);
-        l4.setBounds(130, 50, 200, 30);
-
-        b0.addActionListener(this);
-
-    }
-
-
-
-    public void actionPerformed(ActionEvent e)
+    public Checking()
     {
-        f1.dispose();
-        Project2 p2=new Project2();
+        super();
+        this.overDraft = 0;
     }
 
-    public static void main(String args[])
-    {
-        Bank p3=new Bank();
-    }
-
-
-}
-
-
-//third JFrame
-
-class Project2 implements ActionListener {
-    JFrame f1=new JFrame("Online banking Log In");
-    JLabel l1,l2;
-    JTextField t1,t2;
-    JButton b5;
-    JLabel l3,l4;
-
-    Project2()
-    {
-
-        l1=new JLabel("Withdraw");
-        l2=new JLabel("Deposit");
-        l3=new JLabel("$");
-        l4=new JLabel("$");
-
-        t1=new JTextField(20);
-        t2=new JTextField(20);
-        b5=new JButton("Add a new account");
-
-        f1.setSize(400,400);
-        f1.setVisible(true);
-        f1.setLayout(null);
-
-        f1.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-        f1.add(l1);
-        f1.add(t1);
-        f1.add(l2);
-        f1.add(t2);
-        f1.add(l3);
-        f1.add(l4);
-
-        f1.getContentPane().add(b5);
-        Container c = f1.getContentPane();
-        c.setBackground(Color.LIGHT_GRAY);
-
-        l1.setBounds(230,30,100,30);
-        t1.setBounds(110,30,100,30);
-        l2.setBounds(230,70,100,30);
-        t2.setBounds(110,70,100,30);
-        b5.setBounds(70,300,300,30);
-
-        l3.setBounds(100,30,100,30);
-        l4.setBounds(100,67,100,30);
-
-        b5.addActionListener(this);
-
-
-        t2.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent event) {
-                System.out.println("Deposit Amount $" + t2.getText());
-            }
-        });
-
-
-
-
-        t1.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent event) {
-                System.out.println("Withdraw Amount $" + t1.getText());
-            }
-        });
-
-
-
-    }
-
-    public void actionPerformed(ActionEvent e)
-    {
-        f1.dispose();
-        Project3 p3=new Project3();
-    }
-
-    public static void main(String ag[])
-    {
-        Bank p4=new Bank();
-    }
-}
-
-//Second JFrame
-
-
-class Project3 implements ActionListener {
-    JFrame f1=new JFrame("New Account");
-    JLabel l1,l2;
-    JTextField t1,t2;
-    JButton b9;
-
-    Project3()
-    {
-        l1=new JLabel("Account Name:");
-        l2=new JLabel("Initial Deposit:");
-        t1=new JTextField(20);
-        t2=new JTextField(20);
-        b9=new JButton("Create Account");
-
-        f1.setSize(400,400);
-        f1.setVisible(true);
-        f1.setLayout(null);
-
-        f1.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-        f1.add(l1);
-        f1.add(t1);
-        f1.add(l2);
-        f1.add(t2);
-
-        f1.getContentPane().add(b9);
-        Container c = f1.getContentPane();
-        c.setBackground(Color.LIGHT_GRAY);
-
-        l1.setBounds(0,30,100,30);
-        t1.setBounds(110,30,100,30);
-        l2.setBounds(0,70,100,30);
-        t2.setBounds(110,70,100,30);
-        b9.setBounds(50,120,200,30);
-
-        b9.addActionListener(this);
-
-
-        t2.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent event) {
-                System.out.println("Deposit Amount $" + t2.getText());
-            }
-        });
-
-
-
-
-        t1.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent event) {
-                System.out.println("Withdraw Amount $" + t1.getText());
-            }
-        });
-
-
-
-    }
-
-    public void actionPerformed(ActionEvent e)
-    {
-        f1.dispose();
-        Project5 p4=new Project5();
-    }
-
-    public static void main(String ag[])
-    {
-        Bank p5=new Bank();
-    }
-}
-
-class Project5 implements ActionListener {
-    JFrame f1 = new JFrame("Banking");
-
-
-    JButton b0;
-    JLabel l3;
-
-
-
-    Project5() {
-        JLabel l3 = new JLabel("Account Created", SwingConstants.CENTER);
-        l3.setFont(new Font("Serif", Font.BOLD, 20));
-
-
-
-        b0 = new JButton("Checking");
-
-
-        f1.setSize(400, 400);
-        f1.setVisible(true);
-        f1.setLayout(null);
-
-        f1.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-
-
-        f1.add(l3);
-        
-
-
-        f1.getContentPane().add(b0);
-        Container c = f1.getContentPane();
-        c.setBackground(Color.LIGHT_GRAY);
-
-
-        b0.setBounds(145, 100, 100, 30);
-
-
-
-        l3.setBounds(100, 10, 200, 30);
-
-
-        f1.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+    public Checking(String accountName, String accountNumber, double balance) {
+        super(accountName, accountNumber, balance);
+        this.overDraft = 1000;
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
+    public void deposit(double amt) {
+        setBalance(getBalance() + amt);
+        JOptionPane.showMessageDialog(null, "Deposit of $" + String.format("%.2f", amt)
+                + " is successful!");
+        getTransactions().add("$" + String.format("%.2f", amt) + " is credited to account number " + getAccountNumber());
+    }
 
+    @Override
+    public void withdraw(double amt) {
+        if(getBalance() - amt < 0)
+        {
+            JOptionPane.showMessageDialog(null, "Insufficient funds");
+            return;
+        }
+
+        if(getBalance() - amt < this.overDraft)
+        {
+            JOptionPane.showMessageDialog(null, "Exceeded overdraft limit Reached"
+                    + "to your account");
+            setBalance(getBalance() - amt - 25);
+        }
+        else
+            setBalance(getBalance() - amt);
+
+        JOptionPane.showMessageDialog(null, "Withdrawal of $" + String.format("%.2f", amt)
+                + " is successful!");
+        getTransactions().add("$" + String.format("%.2f", amt) + " is debited from account number " + getAccountNumber());
+    }
+
+    @Override
+    public void transfer(Account acc, double amt) {
+        if(getAccountNumber().equals(acc.getAccountNumber()))
+        {
+            JOptionPane.showMessageDialog(null, "Funds can't be transferred");
+            return;
+        }
+
+        if(getBalance() - amt < 0)
+        {
+            JOptionPane.showMessageDialog(null, "Insufficient funds");
+            return;
+        }
+
+        if(getBalance() - amt < this.overDraft)
+        {
+            JOptionPane.showMessageDialog(null, "Overdraft limit reached"
+                    + "to your account");
+            setBalance(getBalance() - amt - 25);
+        }
+        else
+            setBalance(getBalance() - amt);
+
+        acc.setBalance(acc.getBalance() + amt);
+        JOptionPane.showMessageDialog(null, "Transfer Completed");
+        getTransactions().add("$" + String.format("%.2f", amt)
+                + " Money has been transferred from account " + getAccountNumber() + " to account " + acc.getAccountNumber());
     }
 }
 
+//Savings.java
+import javax.swing.JOptionPane;
+
+public class Savings extends Account{
+
+    public Savings(){ super(); }
+
+    public Savings(String accountName, String accountNumber, double balance) {
+        super(accountName, accountNumber, balance);
+    }
+
+    @Override
+    public void deposit(double amt) {
+        setBalance(getBalance() + amt);
+        JOptionPane.showMessageDialog(null, "Deposit of $" + String.format("%.2f", amt)
+                + "successful");
+        getTransactions().add("$" + String.format("%.2f", amt) + " is credited to account number " + getAccountNumber());
+    }
+
+    @Override
+    public void withdraw(double amt) {
+        if(getBalance() - amt < 0)
+        {
+            JOptionPane.showMessageDialog(null, "Insufficient funds");
+            return;
+        }
+        setBalance(getBalance() - amt);
+        JOptionPane.showMessageDialog(null, "Withdrawal of $" + String.format("%.2f", amt)
+                + "successful");
+        getTransactions().add("$" + String.format("%.2f", amt) + " is debited from account number " + getAccountNumber());
+    }
+
+    @Override
+    public void transfer(Account acc, double amt) {
+        if(getAccountNumber().equals(acc.getAccountNumber()))
+        {
+            JOptionPane.showMessageDialog(null, "Funds can't be transferred");
+            return;
+        }
+
+        if(getBalance() - amt < 0)
+        {
+            JOptionPane.showMessageDialog(null, "Insufficient funds");
+            return;
+        }
+        setBalance(getBalance() - amt);
+        acc.setBalance(acc.getBalance() + amt);
+        JOptionPane.showMessageDialog(null, "Transfer successful");
+        getTransactions().add("$" + String.format("%.2f", amt)
+                + " has been transferred from account " + getAccountNumber() + " to account" + acc.getAccountNumber());
+    }
+
+}
+
+//Account.java
+import java.util.ArrayList;
+
+public abstract class Account {
+    private String holderName, accountNumber;
+    private double balance;
+    private ArrayList<String> transactions;
+
+    public Account()
+    {
+        this.holderName = "";
+        this.accountNumber = "";
+        this.balance = 0;
+        this.transactions = new ArrayList<>();
+    }
+
+    public Account(String holderName, String accountNumber, double balance) {
+        this.holderName = holderName;
+        this.accountNumber = accountNumber;
+        this.balance = balance;
+        this.transactions = new ArrayList<>();
+    }
+
+    public String getaccountName() {
+        return holderName;
+    }
+
+    public String getAccountNumber() {
+        return accountNumber;
+    }
+
+    public double getBalance() {
+        return balance;
+    }
+
+    public void setBalance(double balance) {
+        this.balance = balance;
+    }
+
+    public ArrayList<String> getTransactions() {
+        return transactions;
+    }
+
+    abstract public void deposit(double amt);
+    abstract public void withdraw(double amt);
+    abstract public void transfer(Account acc, double amt);
+}
