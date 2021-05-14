@@ -12,7 +12,7 @@ import javax.swing.JTextField;
 
 
 
-public class TheBankApp {
+public class Bank {
 
 
 
@@ -38,7 +38,7 @@ public class TheBankApp {
     public static void main(String[] args)
     {
 
-        JFrame frame = new JFrame("Banking");
+        JFrame frame = new JFrame("Banking App");
         frame.getContentPane().setBackground(Color.red);
 
         frame.pack();
@@ -54,12 +54,9 @@ public class TheBankApp {
         mainPanel = new JPanel(new GridLayout(2, 1));
 
         loginPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        loginAccLabel = new JLabel("Please Enter Account Number: ");
-        loginField = new JTextField(25);
+        loginAccLabel = new JLabel("Enter account number: ");
+        loginField = new JTextField(10);
         loginButton = new JButton("Log In");
-        JLabel loginaccount = new JLabel("Accounts: 1234,4321,6789");
-        loginaccount.setText("Account Numbers: 1234, 4321, 6789");
-        loginaccount.setBounds(1000,10,100,20);
 
 
 
@@ -67,7 +64,6 @@ public class TheBankApp {
         loginPanel.add(loginAccLabel);
         loginPanel.add(loginField);
         loginPanel.add(loginButton);
-        loginPanel.add(loginaccount);
 
         detailsPanel = new JPanel(new GridLayout(3, 2));
         holderNameLabel = new JLabel("Account Name: ");
@@ -119,7 +115,7 @@ public class TheBankApp {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if(loginField.getText().equals(""))
-                    JOptionPane.showMessageDialog(null, "Enter an Account Number");
+                    JOptionPane.showMessageDialog(null, "No transfer number entered.");
                 else
                 {
                     String accNum = loginField.getText().trim();
@@ -178,7 +174,7 @@ public class TheBankApp {
                 String accNum = JOptionPane.showInputDialog("Transfer Account Number:");
                 if(accNum.equals(""))
                 {
-                    JOptionPane.showMessageDialog(null, "Account Number Invalid");
+                    JOptionPane.showMessageDialog(null, "Enter transfer account number.");
                     return;
                 }
                 int index = searchAccount(accounts, accNum);
@@ -189,12 +185,8 @@ public class TheBankApp {
                 }
 
                 Account transfer = accounts.get(index);
-                String inp = JOptionPane.showInputDialog("Transfer Amount:");
-                while(!isDouble(inp))
-                {
-                    inp = JOptionPane.showInputDialog("Transfer Amount:");
-                }
-                owner.transfer(transfer, index);
+                double inp = Double.parseDouble(JOptionPane.showInputDialog("Transfer Amount:"));
+                owner.transfer(transfer, inp);
                 balanceField.setText(String.format("$ %.2f", owner.getBalance()));
             }
         });
@@ -251,187 +243,4 @@ public class TheBankApp {
             return false;
         }
     }
-}
-
-
-//Checkings.java
-
-import javax.swing.JOptionPane;
-
-public class Checking extends Account{
-
-
-    private double overDraft;
-
-    public Checking()
-    {
-        super();
-        this.overDraft = 0;
-    }
-
-    public Checking(String accountName, String accountNumber, double balance) {
-        super(accountName, accountNumber, balance);
-        this.overDraft = 1000;
-    }
-
-    @Override
-    public void deposit(double amt) {
-        setBalance(getBalance() + amt);
-        JOptionPane.showMessageDialog(null, "Deposit of $" + String.format("%.2f", amt)
-                + " is successful!");
-        getTransactions().add("$" + String.format("%.2f", amt) + " is credited to account number " + getAccountNumber());
-    }
-
-    @Override
-    public void withdraw(double amt) {
-        if(getBalance() - amt < 0)
-        {
-            JOptionPane.showMessageDialog(null, "Insufficient funds");
-            return;
-        }
-
-        if(getBalance() - amt < this.overDraft)
-        {
-            JOptionPane.showMessageDialog(null, "Exceeded overdraft limit Reached"
-                    + "to your account");
-            setBalance(getBalance() - amt - 25);
-        }
-        else
-            setBalance(getBalance() - amt);
-
-        JOptionPane.showMessageDialog(null, "Withdrawal of $" + String.format("%.2f", amt)
-                + " is successful!");
-        getTransactions().add("$" + String.format("%.2f", amt) + " is debited from account number " + getAccountNumber());
-    }
-
-    @Override
-    public void transfer(Account acc, double amt) {
-        if(getAccountNumber().equals(acc.getAccountNumber()))
-        {
-            JOptionPane.showMessageDialog(null, "Funds can't be transferred");
-            return;
-        }
-
-        if(getBalance() - amt < 0)
-        {
-            JOptionPane.showMessageDialog(null, "Insufficient funds");
-            return;
-        }
-
-        if(getBalance() - amt < this.overDraft)
-        {
-            JOptionPane.showMessageDialog(null, "Overdraft limit reached"
-                    + "to your account");
-            setBalance(getBalance() - amt - 25);
-        }
-        else
-            setBalance(getBalance() - amt);
-
-        acc.setBalance(acc.getBalance() + amt);
-        JOptionPane.showMessageDialog(null, "Transfer Completed");
-        getTransactions().add("$" + String.format("%.2f", amt)
-                + " Money has been transferred from account " + getAccountNumber() + " to account " + acc.getAccountNumber());
-    }
-}
-
-//Savings.java
-import javax.swing.JOptionPane;
-
-public class Savings extends Account{
-
-    public Savings(){ super(); }
-
-    public Savings(String accountName, String accountNumber, double balance) {
-        super(accountName, accountNumber, balance);
-    }
-
-    @Override
-    public void deposit(double amt) {
-        setBalance(getBalance() + amt);
-        JOptionPane.showMessageDialog(null, "Deposit of $" + String.format("%.2f", amt)
-                + "successful");
-        getTransactions().add("$" + String.format("%.2f", amt) + " is credited to account number " + getAccountNumber());
-    }
-
-    @Override
-    public void withdraw(double amt) {
-        if(getBalance() - amt < 0)
-        {
-            JOptionPane.showMessageDialog(null, "Insufficient funds");
-            return;
-        }
-        setBalance(getBalance() - amt);
-        JOptionPane.showMessageDialog(null, "Withdrawal of $" + String.format("%.2f", amt)
-                + "successful");
-        getTransactions().add("$" + String.format("%.2f", amt) + " is debited from account number " + getAccountNumber());
-    }
-
-    @Override
-    public void transfer(Account acc, double amt) {
-        if(getAccountNumber().equals(acc.getAccountNumber()))
-        {
-            JOptionPane.showMessageDialog(null, "Funds can't be transferred");
-            return;
-        }
-
-        if(getBalance() - amt < 0)
-        {
-            JOptionPane.showMessageDialog(null, "Insufficient funds");
-            return;
-        }
-        setBalance(getBalance() - amt);
-        acc.setBalance(acc.getBalance() + amt);
-        JOptionPane.showMessageDialog(null, "Transfer successful");
-        getTransactions().add("$" + String.format("%.2f", amt)
-                + " has been transferred from account " + getAccountNumber() + " to account" + acc.getAccountNumber());
-    }
-
-}
-
-//Account.java
-import java.util.ArrayList;
-
-public abstract class Account {
-    private String holderName, accountNumber;
-    private double balance;
-    private ArrayList<String> transactions;
-
-    public Account()
-    {
-        this.holderName = "";
-        this.accountNumber = "";
-        this.balance = 0;
-        this.transactions = new ArrayList<>();
-    }
-
-    public Account(String holderName, String accountNumber, double balance) {
-        this.holderName = holderName;
-        this.accountNumber = accountNumber;
-        this.balance = balance;
-        this.transactions = new ArrayList<>();
-    }
-
-    public String getaccountName() {
-        return holderName;
-    }
-
-    public String getAccountNumber() {
-        return accountNumber;
-    }
-
-    public double getBalance() {
-        return balance;
-    }
-
-    public void setBalance(double balance) {
-        this.balance = balance;
-    }
-
-    public ArrayList<String> getTransactions() {
-        return transactions;
-    }
-
-    abstract public void deposit(double amt);
-    abstract public void withdraw(double amt);
-    abstract public void transfer(Account acc, double amt);
 }
